@@ -6,6 +6,6 @@ import org.junit.Test;
 public class AutorisationimporterIsUpIT {
 	@Test
 	public void statusPageReturns200OK() throws Exception {
-		new StatuspageChecker().assertThatStatuspageReturns200OK("autorisationimporter");
+		new StatuspageChecker("autorisationimporter").assertThatStatuspageReturns200OK();
 	}
 }
