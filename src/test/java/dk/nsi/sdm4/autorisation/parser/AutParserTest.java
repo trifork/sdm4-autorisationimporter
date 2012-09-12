@@ -25,12 +25,10 @@
 
 package dk.nsi.sdm4.autorisation.parser;
 
-import dk.nsi.sdm4.autorisation.config.AutorisationApplicationConfig;
 import dk.nsi.sdm4.autorisation.model.Autorisation;
 import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserException;
 import dk.nsi.sdm4.core.persistence.Persister;
-import dk.nsi.sdm4.testutils.TestDbConfiguration;
 import dk.sdsd.nsp.slalog.api.SLALogger;
 import dk.sdsd.nsp.slalog.impl.SLALoggerDummyImpl;
 import org.apache.commons.io.FileUtils;
@@ -45,13 +43,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -85,11 +81,13 @@ public class AutParserTest {
     
     public static File valid;
     public static File invalid;
+	private File validWith3Removed;
 
-    @Before
+	@Before
     public void setUp() {
         valid = FileUtils.toFile(getClass().getClassLoader().getResource("data/aut/valid/20090915AutDK.csv"));
-        invalid = FileUtils.toFile(getClass().getClassLoader().getResource("data/aut/invalid/20090915AutDK.csv"));
+	    validWith3Removed = FileUtils.toFile(getClass().getClassLoader().getResource("data/aut/validWith3Removed/20090919AutDK.csv"));
+	    invalid = FileUtils.toFile(getClass().getClassLoader().getResource("data/aut/invalid/20090915AutDK.csv"));
     }
 
     @Test
@@ -101,9 +99,20 @@ public class AutParserTest {
         assertEquals("0101280063", a.getCpr());
         assertEquals("Tage Søgaard", a.getFornavn());
     }
-    
-    @Test(expected = ParserException.class)
+
+	@Test
+	public void doesNotAllowNumberOfAutorisationerToDecreaseMoreThanThreshold() throws IOException {
+		try {
+			parser.parse(validWith3Removed, new DateTime());
+			fail("Expected exception from parser because number of autorisationer decreased too much");
+		} catch (ParserException e) {
+			assertTrue(e.getMessage().equals("Number of autorisationer in file was 3 lower than the number of active autorisationer in the database. " +
+					"This is more than the threshold of 1, so file is not imported"));
+		}
+	}
+
+	@Test(expected = ParserException.class)
     public void testInvalid() throws IOException {
-        new AutorisationParser().parse(invalid, new DateTime());
+        parser.parse(invalid, new DateTime());
     }
 }
