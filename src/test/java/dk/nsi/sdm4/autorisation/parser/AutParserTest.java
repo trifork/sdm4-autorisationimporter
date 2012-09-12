@@ -39,6 +39,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -48,12 +50,17 @@ import java.io.File;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
+import static org.junit.matchers.JUnitMatchers.containsString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class AutParserTest {
 	@Configuration
+	@PropertySource({"classpath:test.properties"})
 	static class TestConf {
 		@Bean
 		public Parser parser() {
@@ -74,11 +81,19 @@ public class AutParserTest {
 		public JdbcTemplate jdbcTemplate() {
 			return mock(JdbcTemplate.class);
 		}
+
+		@Bean
+		public static PropertySourcesPlaceholderConfigurer properties(){
+			return new PropertySourcesPlaceholderConfigurer();
+		}
 	}
 
     @Autowired
     AutorisationParser parser;
-    
+
+	@Autowired
+	JdbcTemplate jdbcTemplate;
+
     public static File valid;
     public static File invalid;
 	private File validWith3Removed;
@@ -102,12 +117,16 @@ public class AutParserTest {
 
 	@Test
 	public void doesNotAllowNumberOfAutorisationerToDecreaseMoreThanThreshold() throws IOException {
+		when(jdbcTemplate.queryForInt(any(String.class))).thenReturn(5); // der er to indgange i den fil vi importer om lidt
+
 		try {
-			parser.parse(validWith3Removed, new DateTime());
+			parser.process(validWith3Removed.getParentFile());
 			fail("Expected exception from parser because number of autorisationer decreased too much");
 		} catch (ParserException e) {
-			assertTrue(e.getMessage().equals("Number of autorisationer in file was 3 lower than the number of active autorisationer in the database. " +
-					"This is more than the threshold of 1, so file is not imported"));
+			assertThat(e.getMessage(), containsString(validWith3Removed.getName()));
+			assertThat(e.getMessage(), containsString("1")); // max allowed reduction
+			assertThat(e.getMessage(), containsString("3")); // reduktionen som antal
+			assertThat(e.getMessage(), containsString("5")); // antal i databasen
 		}
 	}
 

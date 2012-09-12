@@ -36,6 +36,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -52,8 +53,9 @@ import dk.sdsd.nsp.slalog.api.SLALogger;
 public class AutorisationParser implements Parser {
     private static final String FILENAME_DATE_FORMAT = "yyyyMMdd";
     private static final String FILE_ENCODING = "ISO8859-15";
+	public static final String FROMCLAUSE_VALID_AUTORISATIONER = "FROM Autorisation WHERE ValidFrom <= NOW() AND ValidTo > NOW();";
 
-    @Autowired
+	@Autowired
     private SLALogger slaLogger;
 
     @Autowired
@@ -62,7 +64,10 @@ public class AutorisationParser implements Parser {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    @Override
+	@Value("${spooler.autorisationimporter.max.allowed.reduction}")
+	private int maxAllowedReduction;
+
+	@Override
     public void process(File dataset) throws ParserException {
         Preconditions.checkNotNull(dataset);
 
@@ -90,12 +95,13 @@ public class AutorisationParser implements Parser {
 
             for (File file : files) {
                 Autorisationsregisterudtraek autRegisterDataset = parse(file, currentVersion);
-                persister.persistCompleteDataset(autRegisterDataset);
+	            guardAgainsUnacceptableReduction(file, autRegisterDataset);
+		        persister.persistCompleteDataset(autRegisterDataset);
             }
 
             // Update the table for the STS.
             jdbcTemplate.execute("TRUNCATE TABLE autreg");
-            jdbcTemplate.update("INSERT INTO autreg (cpr, given_name, surname, aut_id, edu_id) SELECT cpr, Fornavn, Efternavn, Autorisationsnummer, UddannelsesKode FROM Autorisation WHERE ValidFrom <= NOW() AND ValidTo > NOW();");
+            jdbcTemplate.update("INSERT INTO autreg (cpr, given_name, surname, aut_id, edu_id) SELECT cpr, Fornavn, Efternavn, Autorisationsnummer, UddannelsesKode " + FROMCLAUSE_VALID_AUTORISATIONER);
             
             slaLogItem.setCallResultOk();
             slaLogItem.store();
@@ -111,7 +117,17 @@ public class AutorisationParser implements Parser {
         }
     }
 
-    protected DateTime getDateFromFilename(String filename) {
+	private void guardAgainsUnacceptableReduction(File file, Autorisationsregisterudtraek autRegisterDataset) {
+		int currentNumberOfValidAutorisationer = jdbcTemplate.queryForInt("SELECT COUNT(AutorisationPID) " + FROMCLAUSE_VALID_AUTORISATIONER);
+		int reduction = currentNumberOfValidAutorisationer - autRegisterDataset.size();
+		if (reduction > maxAllowedReduction) {
+	        throw new ParserException("Number of autorisationer in file " + file.getAbsolutePath() +
+			        " is a reduction of " + reduction + " compared to the current number of active autorisationer " + currentNumberOfValidAutorisationer + " in the database. " +
+			        "This is more than the threshold of " + maxAllowedReduction + ", so file is not imported");
+		}
+	}
+
+	protected DateTime getDateFromFilename(String filename) {
         DateTimeFormatter formatter = DateTimeFormat.forPattern(FILENAME_DATE_FORMAT);
         return formatter.parseDateTime(filename.substring(0, 8));
     }
