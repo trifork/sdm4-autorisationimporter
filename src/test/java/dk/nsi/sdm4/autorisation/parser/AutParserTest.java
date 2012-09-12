@@ -27,6 +27,7 @@ package dk.nsi.sdm4.autorisation.parser;
 
 import dk.nsi.sdm4.autorisation.config.AutorisationApplicationConfig;
 import dk.nsi.sdm4.autorisation.model.Autorisation;
+import dk.nsi.sdm4.core.parser.ParserException;
 import dk.nsi.sdm4.testutils.TestDbConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
@@ -70,7 +71,7 @@ public class AutParserTest {
         assertEquals("Tage Søgaard", a.getFornavn());
     }
     
-    @Test(expected = Exception.class)
+    @Test(expected = ParserException.class)
     public void testInvalid() throws IOException {
         new AutorisationParser().parse(invalid, new DateTime());
     }

@@ -119,17 +119,21 @@ public class AutorisationParser implements Parser {
         while (lineIterator.hasNext()) {
             String line = lineIterator.nextLine();
 
-            StringTokenizer st = new StringTokenizer(line, ";");
+	        Autorisation autorisation = new Autorisation();
 
-            Autorisation autorisation = new Autorisation();
+	        try {
+		        StringTokenizer st = new StringTokenizer(line, ";");
 
-            autorisation.setAutorisationnummer(st.nextToken());
-            autorisation.setCpr(st.nextToken());
-            autorisation.setEfternavn(st.nextToken());
-            autorisation.setFornavn(st.nextToken());
-            autorisation.setUddannelsesKode(st.nextToken());
+		        autorisation.setAutorisationnummer(st.nextToken());
+		        autorisation.setCpr(st.nextToken());
+		        autorisation.setEfternavn(st.nextToken());
+		        autorisation.setFornavn(st.nextToken());
+		        autorisation.setUddannelsesKode(st.nextToken());
+	        } catch (RuntimeException e) {
+		        throw new ParserException("Unable to parse line " + line, e);
+	        }
 
-            autorisation.setValidFrom(validFrom.toDate());
+	        autorisation.setValidFrom(validFrom.toDate());
             autorisation.setValidTo(Dates.THE_END_OF_TIME);
 
             dataset.add(autorisation);
