@@ -27,16 +27,24 @@ package dk.nsi.sdm4.autorisation.parser;
 
 import dk.nsi.sdm4.autorisation.config.AutorisationApplicationConfig;
 import dk.nsi.sdm4.autorisation.model.Autorisation;
+import dk.nsi.sdm4.core.parser.Parser;
 import dk.nsi.sdm4.core.parser.ParserException;
+import dk.nsi.sdm4.core.persistence.Persister;
 import dk.nsi.sdm4.testutils.TestDbConfiguration;
+import dk.sdsd.nsp.slalog.api.SLALogger;
+import dk.sdsd.nsp.slalog.impl.SLALoggerDummyImpl;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -44,11 +52,34 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@Transactional
-@ContextConfiguration(classes = {AutorisationApplicationConfig.class, TestDbConfiguration.class})
+@ContextConfiguration(loader = AnnotationConfigContextLoader.class)
 public class AutParserTest {
+	@Configuration
+	static class TestConf {
+		@Bean
+		public Parser parser() {
+			return new AutorisationParser();
+		}
+
+		@Bean
+		public SLALogger slaLogger() {
+			return new SLALoggerDummyImpl();
+		}
+
+		@Bean
+		public Persister persister() {
+			return mock(Persister.class);
+		}
+
+		@Bean
+		public JdbcTemplate jdbcTemplate() {
+			return mock(JdbcTemplate.class);
+		}
+	}
+
     @Autowired
     AutorisationParser parser;
     
