@@ -2,10 +2,9 @@
 
 ## Igang
 Autorisationsimporteren er af typen der bruger en AuditingPersister
-Læs stamdata dokumentation der ligger i SDM-Core projektet inden dette projekt bygges.
+L√¶s stamdata dokumentation der ligger i SDM-Core projektet inden dette projekt bygges.
 Se https://github.com/trifork/sdm4-core/tree/sdm-core-4.0/doc
 
-For at køre integrationstests, kræves en opsætning som beskrevet i guide til udviklere
+For at k√∏re integrationstests, kr√¶ves en ops√∏tning som beskrevet i guide til udviklere
 
 Klon repo med ```git clone https://github.com/trifork/sdm4-autorisationimporter.git```.
-
