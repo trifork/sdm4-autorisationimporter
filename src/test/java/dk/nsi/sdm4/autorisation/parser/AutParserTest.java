@@ -130,6 +130,16 @@ public class AutParserTest {
 		}
 	}
 
+	@Test
+	public void doesNotAllowMoreThanOneInputFile() throws IOException {
+		try {
+			parser.process(valid.getParentFile()); // valid indeholder 2 filer
+			fail("Expected exception from parser because number of files is not one");
+		} catch (ParserException e) {
+			assertThat(e.getMessage(), containsString("2")); // antal filer
+		}
+	}
+
 	@Test(expected = ParserException.class)
     public void testInvalid() throws IOException {
         parser.parse(invalid, new DateTime());

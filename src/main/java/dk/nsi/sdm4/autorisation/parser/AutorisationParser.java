@@ -73,6 +73,10 @@ public class AutorisationParser implements Parser {
 
         File[] files = dataset.listFiles();
 
+		if (files.length != 1) {
+			throw new ParserException("Data directory " + dataset.getAbsolutePath() + " contains " + files.length + " files, but expected exactly one");
+		}
+
         SLALogItem slaLogItem = slaLogger.createLogItem("AutorisationImporter", "All Files");
 
         try {
