@@ -102,7 +102,12 @@ public class AutorisationParser implements Parser {
         } catch (Exception e) {
             slaLogItem.setCallResultError("AutorisationImporter failed - Cause: " + e.getMessage());
             slaLogItem.store();
-            throw new ParserException(e);
+	        if (e instanceof ParserException) {
+		        // do not wrap more than we need to
+		        throw (ParserException) e;
+	        } else {
+                throw new ParserException(e);
+	        }
         }
     }
 
