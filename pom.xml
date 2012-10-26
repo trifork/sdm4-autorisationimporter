@@ -9,13 +9,14 @@
 
 	<artifactId>autorisationimporter</artifactId>
 	<packaging>war</packaging>
-	<version>4.2-SNAPSHOT</version>
+	<version>4.2</version>
 
     <scm>
         <url>scm:git:git@github.com:trifork/sdm4-autorisationimporter</url>
         <connection>scm:git:git@github.com:trifork/sdm4-autorisationimporter.git</connection>
         <developerConnection>scm:git:git@github.com:trifork/sdm4-autorisationimporter.git</developerConnection>
-    </scm>
+      <tag>autorisationimporter-4.2</tag>
+  </scm>
     <issueManagement>
         <system>JIRA</system>
         <url>https://jira.trifork.com/</url>
