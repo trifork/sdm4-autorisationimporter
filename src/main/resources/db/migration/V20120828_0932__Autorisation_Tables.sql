@@ -1,4 +1,4 @@
-CREATE TABLE Autorisation (
+CREATE TABLE  IF NOT EXISTS Autorisation (
     AutorisationPID BIGINT(15) AUTO_INCREMENT NOT NULL PRIMARY KEY,
     
     Autorisationsnummer CHAR(5) NOT NULL,
