@@ -20,7 +20,7 @@ CREATE TABLE  IF NOT EXISTS Autorisation (
 -- This table is used to hold the set of currently valid
 -- autorisations. (Used by the STS)
 --
-CREATE TABLE autreg (
+ CREATE TABLE IF NOT EXISTS autreg (
   id BIGINT AUTO_INCREMENT NOT NULL PRIMARY KEY,
   
   cpr CHAR(10) NOT NULL,

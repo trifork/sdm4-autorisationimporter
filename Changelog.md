@@ -6,3 +6,8 @@
 
 ## autorisationimporter 4.2
 *  NSPSUPPORT-103: Databaseskema kan nu køres på eksisterende sdm3-skema uden runtime-fejl
+
+## autorisationimporter 4.3
+*  rettelse til NSPSUPPORT-103: Databaseskema kan nu køres på eksisterende sdm3-skema uden runtime-fejl
+   i 4.2 kan importeren ikke tåle at tabellen autreg findes i forvejen
+   
