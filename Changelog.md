@@ -11,3 +11,6 @@
 *  rettelse til NSPSUPPORT-103: Databaseskema kan nu køres på eksisterende sdm3-skema uden runtime-fejl
    i 4.2 kan importeren ikke tåle at tabellen autreg findes i forvejen
    
+## autorisationimporter 4.4
+*  Opgrading til sdm4-core 4.3, der løser
+   NSPSUPPORT-126: ParserExecutor logger filers absolutte stier og md5-summer inden parser behandler dem 
