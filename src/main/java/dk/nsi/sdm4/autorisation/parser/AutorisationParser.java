@@ -78,6 +78,9 @@ public class AutorisationParser implements Parser {
 			throw new ParserException("Data directory " + dataset.getAbsolutePath() + " contains " + files.length + " files, but expected exactly one");
 		}
 
+        // Make sure we update transaction time
+        persister.resetTransactionTime();
+
         SLALogItem slaLogItem = slaLogger.createLogItem("AutorisationImporter", "All Files");
 
         try {
