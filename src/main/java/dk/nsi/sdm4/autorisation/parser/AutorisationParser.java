@@ -69,7 +69,7 @@ public class AutorisationParser implements Parser {
 	private int maxAllowedReduction;
 
 	@Override
-    public void process(File dataset) throws ParserException {
+    public void process(File dataset, String identifier) throws ParserException {
         Preconditions.checkNotNull(dataset);
 
         File[] files = dataset.listFiles();
@@ -80,9 +80,9 @@ public class AutorisationParser implements Parser {
 
         // Make sure we update transaction time
         persister.resetTransactionTime();
-
-        SLALogItem slaLogItem = slaLogger.createLogItem("AutorisationImporter", "All Files");
-
+        SLALogItem slaLogItem = slaLogger.createLogItem(getHome()+".process", "SDM4."+getHome()+".process");
+        slaLogItem.setMessageId(identifier);
+        slaLogItem.addCallParameter(Parser.SLA_INPUT_NAME, dataset.getAbsolutePath());
         try {
             // Make sure the file set has not been imported before.
             // Check what the previous highest version is (the ValidFrom column).
@@ -101,16 +101,19 @@ public class AutorisationParser implements Parser {
                                 + previousVersion + "', new_version='" + currentVersion + "'.");
             }
 
+            int processed = 0;
             for (File file : files) {
                 Autorisationsregisterudtraek autRegisterDataset = parse(file, currentVersion);
 	            guardAgainsUnacceptableReduction(file, autRegisterDataset);
+                processed += autRegisterDataset.size();
 		        persister.persistCompleteDataset(autRegisterDataset);
             }
 
             // Update the table for the STS.
             jdbcTemplate.execute("TRUNCATE TABLE autreg");
             jdbcTemplate.update("INSERT INTO autreg (cpr, given_name, surname, aut_id, edu_id) SELECT cpr, Fornavn, Efternavn, Autorisationsnummer, UddannelsesKode " + FROMCLAUSE_VALID_AUTORISATIONER);
-            
+
+            slaLogItem.addCallParameter(Parser.SLA_RECORDS_PROCESSED_MAME, ""+processed);
             slaLogItem.setCallResultOk();
             slaLogItem.store();
         } catch (Exception e) {

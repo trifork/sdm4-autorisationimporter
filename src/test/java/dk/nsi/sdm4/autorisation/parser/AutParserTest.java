@@ -121,7 +121,7 @@ public class AutParserTest {
 		when(jdbcTemplate.queryForInt(any(String.class))).thenReturn(5); // der er to indgange i den fil vi importer om lidt
 
 		try {
-			parser.process(validWith3Removed.getParentFile());
+			parser.process(validWith3Removed.getParentFile(), "id");
 			fail("Expected exception from parser because number of autorisationer decreased too much");
 		} catch (ParserException e) {
 			assertThat(e.getMessage(), containsString(validWith3Removed.getName()));
@@ -134,7 +134,7 @@ public class AutParserTest {
 	@Test
 	public void doesNotAllowMoreThanOneInputFile() throws IOException {
 		try {
-			parser.process(valid.getParentFile()); // valid indeholder 2 filer
+			parser.process(valid.getParentFile(), "id"); // valid indeholder 2 filer
 			fail("Expected exception from parser because number of files is not one");
 		} catch (ParserException e) {
 			assertThat(e.getMessage(), containsString("2")); // antal filer

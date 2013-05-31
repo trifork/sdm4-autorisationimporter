@@ -65,7 +65,7 @@ public class AutorisationImportTest {
     @Test
     public void testCanImport() throws IOException, InterruptedException {
         File dataset = createTestDataset("data/aut/valid/20090915AutDK.csv");
-        parser.process(dataset);
+        parser.process(dataset, "id");
         long cnt = jdbcTemplate.queryForLong("SELECT count(1) FROM Autorisation");
         assertEquals(4, cnt);
         Thread.sleep(1000);
@@ -76,7 +76,7 @@ public class AutorisationImportTest {
 
         // Import another file and check validTo is set correctly and modified date is updated
         dataset = createTestDataset("data/aut/valid/20090918AutDK.csv");
-        parser.process(dataset);
+        parser.process(dataset, "id");
         cnt = jdbcTemplate.queryForLong("SELECT count(1) FROM Autorisation");
         assertEquals(6, cnt);
         cnt = jdbcTemplate.queryForLong("SELECT count(1) FROM Autorisation WHERE ValidTo>=?", new Timestamp(now.getTime()));

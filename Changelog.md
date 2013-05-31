@@ -16,3 +16,7 @@
    NSPSUPPORT-126: ParserExecutor logger filers absolutte stier og md5-summer inden parser behandler dem
 *  Opgraderet til sdm-core 4.9 for at kunne resette transaction time
 *  SDM-23: Reset transaction time før hver import
+
+## autorisationimporter 4.5
+*  SDM-5 SLA-log fra SDM4-importere følger ikke standarden
+*  Tilføjet kopi register view, så kopi register service maps nu bliver oprettet automatisk
